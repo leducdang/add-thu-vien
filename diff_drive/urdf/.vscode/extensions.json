@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ms-iot.vscode-ros",
+        "jaehyunshim.vscode-ros",
+        "sweilz.ros-snippets",
+        "pijar.ros-snippets"
+    ]
+}

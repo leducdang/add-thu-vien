@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot name="myfirst">
+
+    <material name="Black">
+        <color rgba="0.0 0.0 0.0 1.0"/>
+    </material>
+
+    <material name="White">
+        <color rgba="1.0 1.0 1.0 1.0"/>
+    </material>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.2 0.01"/> 
+      </geometry>
+      <material name= "White"/>
+    </visual>
+  </link>
+
+  <link name="wheel_link">
+    <visual>
+        <geometry>
+            <cylinder radius="0.05" length="0.02"/>
+        </geometry>
+        <material name="LightGrey">
+            <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+    </visual>
+    <collision>
+        <geometry>
+            <cylinder radius="0.05" length="0.02"/>
+        </geometry>
+    </collision>
+    <inertial>
+        <mass value="0.0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+    </inertial>
+  </link>
+
+  <joint name="banh_xe_trai_truoc" type="continuous">
+    <parent link="base_link"/>
+    <child link="wheel_link"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0.06 0.05 0.0" rpy="0 1.57 0"/>
+  </joint>
+  
+</robot>

@@ -1,0 +1,153 @@
+<launch>
+
+<arg name="model" default="$(find diff_drive)/urdf/03-diff_drive.urdf.xacro"/>
+<!--<arg name="rvizconfig" default="$(find urdf_tutorial)/rviz/urdf.rviz"/>-->
+<arg name="rvizconfig" default="$(find diff_drive)/rviz/diff_drive.rviz"/>
+
+<arg name="map_file" default="$(find diff_drive)/map_sever/diff_drive_map.yaml"/>
+
+
+
+<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
+  </node>
+
+
+<!-- Launch gazebo -->
+<include file="$(find diff_drive)/launch/gazebo.launch">
+  <arg name="model" value="$(arg model)"/>
+ </include> 
+
+
+<!--<node name="rviz" pkg="rviz" type="rviz" args="rviz"/>-->
+<!-- Load joint controller configuration from YAML file to parameter server -->
+
+<rosparam file="$(find diff_drive)/config/joint_states.yaml" command="load"/>
+<rosparam file="$(find diff_drive)/config/diff_drive.yaml" command="load"/>
+
+
+<!-- load the controllers -->
+<node name="robot_arm_controller_spawner" pkg="controller_manager" type="spawner"
+  respawn="true" output="screen" 
+   args="/Diff_Drive/joint_state_controller
+         /Diff_Drive/diff_drive_controller
+        --shutdown-timeout 3"/>
+
+<!-- convert joint states to TF transforms for rviz, etc -->
+<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="false" output="screen">
+</node>
+
+<!--
+<node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"> 
+  <param name="default_topic" value="/Diff_Drive/diff_drive_controller/cmd_vel"/> 
+</node> 
+-->
+<!--
+<node pkg="diff_drive" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen" >
+  <remap from="/cmd_vel" to="/Diff_Drive/diff_drive_controller/cmd_vel"/>
+</node>
+-->
+
+  
+<!--
+<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+  <param name="base_frame" value="base_link"/>
+  <param name="odom_frame" value="odom"/>
+  <param name="map_update_interval" value="5.0"/>
+  <param name="maxUrange" value="6.0"/>
+  <param name="maxRange" value="8.0"/>
+  <param name="sigma" value="0.05"/>
+  <param name="kernelSize" value="1"/>
+  <param name="lstep" value="0.05"/>
+  <param name="iterations" value="5"/>
+  <param name="lsigma" value="0.075"/>
+  <param name="miniumScore" value="100"/>
+  <param name="srr" value="0.01"/>
+  <param name="srt" value="0.02"/>
+  <param name="str" value="0.01"/> 
+  <param name="stt" value="0.02"/>
+  <param name="linearUpdate" value="0.05"/>
+  <param name="angularUpdate" value="0.436"/>
+  <param name="temporalUpdate" value="-1.0"/>
+  <param name="resampleThreshold" value="0.5"/>
+  <param name="particles" value="80"/>
+
+  <param name="xmin" value="-1.0"/>
+  <param name="ymin" value="-1.0"/>
+  <param name="xmax" value="1.0"/>
+  <param name="ymax" value="1.0"/>
+
+  <param name="delta" value="0.05"/>
+  <param name="llsamplerange" value="0.01"/>
+  <param name="llsamplestep" value="0.01"/>
+  <param name="lasamplerange" value="0.005"/>
+  <param name="lasamplestep" value="0.005"/>
+</node> 
+-->
+
+
+
+<!-- Defining parameters for move_base node -->
+
+<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+<rosparam file="$(find robot_arm_navigation)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+<rosparam file="$(find robot_arm_navigation)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+<rosparam file="$(find robot_arm_navigation)/param/local_costmap_params.yaml" command="load" />
+<rosparam file="$(find robot_arm_navigation)/param/global_costmap_params.yaml" command="load" />
+<rosparam file="$(find robot_arm_navigation)/param/base_local_planner_params.yaml" command="load" />
+<rosparam file="$(find robot_arm_navigation)/param/dwa_local_planner_params.yaml" command="load" />
+<rosparam file="$(find robot_arm_navigation)/param/move_base_params.yaml" command="load" />
+<remap from="/cmd_vel" to="/Diff_Drive/diff_drive_controller/cmd_vel"/>
+<remap from="odom" to="/Diff_Drive/diff_drive_controller/odom"/>
+</node>
+ 
+
+
+
+  <node pkg="amcl" type="amcl" name="amcl">
+      <param name="odom_model_type" value="diff-corrected"/>
+      <param name="odom_alpha5" value="0.1"/>
+      <param name="initial_pose_x" 	value="0.0"/>
+      <param name="initial_pose_y" 	value="0.0"/>
+      <param name="initial_pose_a" 	value="0.0"/>
+      
+      <param name="transform_tolerance" value="0.5" /> 
+      
+      <param name="gui_publish_rate" value="50.0"/> 
+      <param name="laser_max_beams" value="30"/>
+      <param name="min_particles" value="500"/>
+      <param name="max_particles" value="2000"/>
+      <param name="kld_err" value="0.05"/>
+      <param name="kld_z" value="0.99"/>
+      <param name="odom_alpha1" value="0.2"/>
+      <param name="odom_alpha2" value="0.2"/> 
+    
+      <param name="odom_alpha3" value="0.8"/>
+      <param name="odom_alpha4" value="0.2"/>
+      <param name="laser_z_hit" value="0.5"/>
+      <param name="laser_z_short" value="0.05"/>
+      <param name="laser_z_max" value="0.05"/>
+      <param name="laser_z_rand" value="0.5"/>
+      <param name="laser_sigma_hit" value="0.2"/>
+      <param name="laser_lambda_short" value="0.1"/>
+      <param name="laser_lambda_short" value="0.1"/>
+      <param name="laser_model_type" value="likelihood_field"/>
+      <param name="laser_likelihood_max_dist" value="2.0"/>
+      <param name="update_min_d" value="0.1"/>
+      <param name="update_min_a" value="0.2"/>
+      <param name="odom_frame_id" value="odom"/>
+      <param name="global_frame_id" value="map"/>
+      <param name="resample_interval" value="1"/>
+      <param name="recovery_alpha_slow" value="0.0"/>
+      <param name="recovery_alpha_fast" value="0.0"/> 
+  </node>
+
+
+<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/> 
+<node name="goal_publisher" pkg="diff_drive" type="publish_point.py"  output="screen"/>
+
+</launch>
+
+ 
+
+
